@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naija Hustle & Celebrity Simulator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 1px solid #334155;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 16px;
+        }
+
+        header h1 {
+            color: var(--accent);
+            font-size: 2rem;
+            margin-bottom: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        @media(min-width: 600px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: #111827;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #334155;
+        }
+
+        .stat-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .stat-card h3 {
+            font-size: 1.2rem;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media(min-width: 768px) {
+            .main-layout {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .feed-section {
+            background: #111827;
+            border-radius: 12px;
+            padding: 16px;
+            height: 320px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feed-header {
+            font-weight: bold;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 8px;
+            color: var(--accent);
+        }
+
+        .feed-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #1e293b;
+        }
+
+        .log-danger { color: var(--danger); }
+        .log-success { color: var(--accent); }
+        .log-warning { color: var(--warning); }
+        .log-info { color: var(--info); }
+
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .tab-btn {
+            background: #334155;
+            color: var(--text);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+        }
+
+        .action-pane {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .action-pane.active {
+            display: flex;
+        }
+
+        .action-btn {
+            background: #1e293b;
+            color: var(--text);
+            border: 1px solid #475569;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: #334155;
+            border-color: var(--accent);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .action-title {
+            font-weight: bold;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+        }
+
+        .action-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .setup-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .setup-screen h2 {
+            margin-bottom: 20px;
+        }
+
+        .setup-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .setup-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .game-view {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- Setup / Character Spawn Screen -->
+    <div id="setup-screen" class="setup-screen">
+        <h2>Welcome to Naija Hustle & Celebrity Sim</h2>
+        <p style="color: var(--text-muted); margin-bottom: 30px;">Discover your background, conquer the streets of Lagos and Owerri, survive dynamic updates, and rise to absolute stardom or political power.</p>
+        <button class="setup-btn" onclick="startGame()">Spawn My Character</button>
+    </div>
+
+    <!-- Active Gameplay View -->
+    <div id="game-view" class="game-view">
+        <header>
+            <h1 id="player-name">Hustler</h1>
+            <p id="player-bio" style="color: var(--text-muted); font-size: 0.9rem;"></p>
+        </header>
+
+        <!-- Stats Matrix -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <p>Cash</p>
+                <h3 id="stat-cash" style="color: #10b981;">₦0</h3>
+            </div>
+            <div class="stat-card">
+                <p>Energy</p>
+                <h3 id="stat-energy" style="color: #ef4444;">100%</h3>
+            </div>
+            <div class="stat-card">
+                <p>Followers</p>
+                <h3 id="stat-followers" style="color: #3b82f6;">0</h3>
+            </div>
+            <div class="stat-card">
+                <p>Status</p>
+                <h3 id="stat-status" style="color: #f59e0b;">Lapo</h3>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <!-- Feed Logs -->
+            <div class="feed-section">
+                <div class="feed-header" id="feed-title">Live Updates & Feeds</div>
+                <div class="feed-content" id="feed-content"></div>
+            </div>
+
+            <!-- Controls and System Tabs -->
+            <div class="control-panel">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchTab('hustle')">Hustle & Map</button>
+                    <button class="tab-btn" onclick="switchTab('social')">Social Media</button>
+                    <button class="tab-btn" onclick="switchTab('studio')">Studio & Brand</button>
+                    <button class="tab-btn" onclick="switchTab('politics')">Politics</button>
+                    <button class="tab-btn" onclick="switchTab('assets')">Inventory & Love</button>
+                </div>
+
+                <!-- Tab Content: Hustle -->
+                <div id="tab-hustle" class="action-pane active"></div>
+
+                <!-- Tab Content: Social Media -->
+                <div id="tab-social" class="action-pane"></div>
+
+                <!-- Tab Content: Studio -->
+                <div id="tab-studio" class="action-pane"></div>
+
+                <!-- Tab Content: Politics -->
+                <div id="tab-politics" class="action-pane"></div>
+
+                <!-- Tab Content: Assets & Inventory -->
+                <div id="tab-assets" class="action-pane"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Game State Engine
+    let gameState = {
+        name: "",
+        background: "",
+        location: "Lagos (Mainland)",
+        cash: 0,
+        energy: 100,
+        followers: 0,
+        fameTier: "Lapo Starter",
+        inventory: [],
+        relationship: "Single",
+        politicalTitle: "Ordinary Citizen",
+        days: 1
+    };
+
+    const firstNames = ["Chidi", "Tunde", "Femi", "Amaka", "Blessing", "Somto", "Efe", "Yemi"];
+    const lastNames = ["Okeke", "Adeleke", "Balogun", "Nwachukwu", "Ibrahim", "Okonkwo"];
+
+    function startGame() {
+        // Generate random identity
+        const randFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const randLast = lastNames[Math.floor(Math.random() * lastNames.length)];
+        gameState.name = `${randFirst} ${randLast}`;
+        
+        // Dynamic spawn choice (Lapo vs Nepo)
+        if(Math.random() > 0.75) {
+            gameState.background = "Nepo Baby";
+            gameState.cash = 15000000; // 15M Naira initial funding
+            gameState.followers = 25000;
+            gameState.fameTier = "Micro-Influencer";
